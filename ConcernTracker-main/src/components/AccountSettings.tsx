@@ -47,7 +47,7 @@ export default function AccountSettings({ role, user, onBack, onUpdateProfile, o
       setStudentProfile({
         fullName: user.fullName || '',
         programYear: user.program || '',
-        section: user.yearSection || '',
+        section: user.section || '',
         email: user.email || '',
         studentId: user.studentId || ''
       });

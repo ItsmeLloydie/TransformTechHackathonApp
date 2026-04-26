@@ -1,0 +1,186 @@
+# ConcernTracker - Project Documentation
+
+## Overview
+
+ConcernTracker is a comprehensive digital platform designed to streamline the process of submitting, tracking, and resolving student concerns within an educational institution. The system enables students to raise concerns across multiple categories (Academic, Financial, and Welfare) while providing administrators with tools to route, manage, and resolve these concerns efficiently.
+
+---
+
+## System Architecture
+
+### Technology Stack
+
+The project uses modern web technologies built on a React frontend with a Supabase backend. The application handles user authentication, manages data storage, processes file uploads, sends notifications, and generates reports—all working together to create a seamless concern tracking experience.
+
+---
+
+## Key Features
+
+### 1. Role-Based Access Control
+
+The system supports three distinct user roles with different permissions:
+
+- Students: Can submit new concerns, view the status of their own submissions, and manage their personal profile information
+- Admins: Can view concerns that have been routed to their specific department, review the history of actions taken, update the status of concerns, and add notes
+- SuperAdmins: Have unrestricted access to view all concerns from all departments, manage staff accounts, approve new administrators, and oversee the entire system
+
+### 2. Concern Categories
+
+Students can submit concerns in three main categories, each automatically routed to the appropriate department:
+
+- Academic: Covers issues like coursework problems, grading disputes, and instructor-related matters. These concerns are automatically sent to the Registrar's office for handling
+- Financial: Covers issues like fee disputes, payment problems, and financial aid questions. These concerns are automatically sent to the Accounting Office for resolution
+- Welfare: Covers issues related to student well-being, accommodation, and health matters. These concerns are automatically sent to the Student Affairs Office for support
+
+### 3. Concern Workflow
+
+Each concern moves through a series of stages from submission to resolution:
+
+1. Submitted - When a student first creates and submits a concern
+2. Routed - The system automatically assigns it to the appropriate department based on the category
+3. Read - An admin from the assigned department has viewed and acknowledged the concern
+4. Screened - The admin has reviewed the details and determined the appropriate action
+5. Resolved - The concern has been fully addressed and the issue is closed
+6. Escalated - When a concern needs higher-level attention or cannot be resolved at the current level
+
+### 4. Anonymous Submissions
+
+Students have the option to submit concerns anonymously, protecting their identity from other students. However, the assigned department staff can still see the student's information if needed for follow-up or support.
+
+### 5. Audit Trail
+
+Every action taken on a concern is recorded and tracked. This includes who made changes, what they did, when they did it, and any notes they added. This complete history is visible to authorized users for transparency and accountability.
+
+### 6. File Attachments
+
+Students can attach supporting documents like PDFs, images, or other files to provide evidence or context for their concerns. These files are stored securely and can be reviewed by the assigned administrators.
+
+### 7. Draft Auto-Save
+
+If a student starts filling out a concern form but doesn't complete it, the system automatically saves their progress locally. When they return, they can restore their draft and continue where they left off, preventing data loss.
+
+---
+
+## Database (Supabase)
+Supabase is a backend service that provides a secure database, user authentication, and file storage for the ConcernTracker system. It acts as the central hub where all student information, staff profiles, concerns, and activity logs are stored and managed. The system ensures that data remains secure, accessible only to authorized users, and backed up reliably.
+
+### Database Structure
+
+The system organizes information into four main data collections:
+
+- Student Profiles: Store information about registered students including their name, email, student ID, academic program, year level, and section. This information is created when a student registers and updated when they modify their profile.
+- Staff Profiles: Store information about administrators and staff members including their name, email, department assignment, job title, and employee ID. This data indicates whether someone is a regular admin or a superadmin with higher privileges, and whether their account has been approved.
+- Concerns: Store all submitted student concerns with details such as the concern title, detailed description, category, assigned department, current status, whether it was submitted anonymously, student information, any attached file, and timestamps showing when it was submitted and last updated.
+- Audit Trail: Store a complete history of every action taken on concerns. This includes a record of who performed each action, what they did, when they did it, and any notes they added. This creates an accountable record of all changes.
+
+---
+
+## Database Interaction Flow
+
+### When a Student Submits a Concern
+
+When a student completes and submits a concern form, the system performs several actions behind the scenes. First, the form data is validated to ensure all required fields are complete. The concern is then saved to the database with an initial status of "Submitted" and automatically assigned a unique concern number for tracking. The system identifies which department should handle the concern based on its category and routes it accordingly. If the student attached a file, it's securely stored. A record is added to the audit trail documenting that the concern was created. Finally, an email notification is sent to the appropriate department staff to alert them of the new concern.
+
+### When an Admin Views and Updates Concerns
+
+When an admin logs into the system, the database verifies their credentials and profile. The admin's dashboard displays only the concerns that have been routed to their specific department—this is enforced by database-level security to ensure staff members can only see concerns they're responsible for. SuperAdmins see all concerns across all departments. When an admin updates a concern's status or adds notes, the system records these changes in the database with a timestamp and the admin's information. The audit trail is updated to maintain a complete history of all actions taken. Students can see these updates in real-time as the system keeps all connected browsers synchronized.
+
+### When a Student Views Their Own Concerns
+
+When a student logs in and views their concern history, the system retrieves only the concerns they submitted. The database security ensures students cannot see concerns submitted by other students. The dashboard displays all their concerns with current status information and allows them to view the complete history of actions taken on each concern through the audit trail.
+
+---
+
+## Security Features
+
+### Row Level Security (RLS)
+
+The database implements security at the lowest level to ensure data privacy. Each user can only access information they're authorized to see:
+
+- Students: can view and edit only their own profile information and the concerns they submitted
+- Admins: can view only the concerns assigned to their department and can see staff profiles but can only edit their own
+- SuperAdmins: have access to all data in the system for oversight and management purposes
+
+This security is enforced by the database itself, not just by the application interface, making it impossible to bypass.
+
+### Authentication Flow
+
+When a user logs in, their credentials are verified against a secure authentication system. If valid, a session is created that identifies the user. This session is used with every database request, and the database checks the user's role and permissions before allowing access to any information. This ensures that even if someone attempts to access data directly, the database rejects unauthorized requests.
+
+---
+
+## Key Components (Data Management)
+
+### Authentication System
+
+The authentication system manages user login, registration, and profile loading. When users first access the application, the system checks if they have an active session. If they do, it loads their profile information from the database—either as a student or staff member. The system also handles password resets when users forget their credentials and ensures that users are logged out when they request to leave the system.
+
+### Concern Management System
+
+The concern management system handles all operations related to concerns. It retrieves and displays concerns based on the user's role and permissions. Students can view only their own concerns, while admins see concerns routed to their department and superadmins see everything. When concerns are submitted, this system creates the database record, generates a unique tracking number, routes it to the appropriate department, and handles any file uploads. When admins update a concern's status, the system logs these changes to the audit trail.
+
+---
+
+## User Workflows
+
+### Student Workflow
+
+A student begins by registering an account or logging in if they already have one. Once logged in, they access a dashboard with two main sections: one to submit new concerns and another to track existing concerns. When submitting a concern, they select the relevant category which automatically determines where it will be routed, write their concern details, and can optionally attach supporting files and choose to remain anonymous. After submission, they receive a confirmation with a unique concern number for reference. They can then track the status of their concern in real-time and view the complete history of actions taken by staff members. Students can also manage their account settings and update their profile information.
+
+### Admin Workflow
+
+An admin logs in and accesses a dashboard showing all concerns that have been routed to their department. They can open each concern to review full details, including student information, the description, and any attached files. As they work through concerns, they update the status to indicate progress—marking them as read when they first review, screened after assessment, and either resolved when the issue is handled or escalated if it requires higher-level attention. When they make any changes or add notes, the system automatically records these actions in the audit trail with timestamps and details.
+
+### SuperAdmin Workflow
+
+A superadmin has elevated privileges and logs into a special dashboard showing all concerns across all departments. They can view the complete system to ensure everything is running smoothly. SuperAdmins can also manage staff accounts—approving new admin registrations, deactivating accounts, or adjusting permissions. They have access to system-wide reports and can view all audit trails to monitor activity and ensure accountability. SuperAdmins also handle concerns that have been escalated beyond the capacity of regular department admins.
+
+---
+
+## System Organization
+
+The application is organized into logical sections:
+
+*User Interface Components* handle all the screens users see—login and registration pages, the form for submitting concerns, dashboards for viewing and managing concerns, student history tracking, and detailed concern views. There are also components for managing user profiles and previewing attached files.
+
+*Data Management* systems handle authentication, concern operations, and communication with the Supabase backend. These systems manage user sessions, load profile information, fetch concerns based on permissions, submit new concerns, update statuses, and handle file uploads.
+
+*Main Application* coordinates everything together, managing which screen to display based on the user's login status and role, handling navigation between different sections, and ensuring the right data flows to the right components.
+
+---
+
+## Setup and Configuration
+
+Before running the application, the system needs to be configured with connection information for the Supabase database and email notification service. This configuration is typically stored in environment variables that the application reads on startup. The application also requires Node.js and npm to be installed.
+
+To get the application running in development mode, you install the required dependencies, start the development server, and access the application through a web browser. The application includes a build process for creating a production-ready version that's optimized for performance and deployment.
+
+---
+
+## Key Interactions Summary
+
+When a user registers, their account is created in the authentication system and their profile is added to the appropriate table (student or staff). When a student submits a concern, it's saved to the database, assigned a tracking number, routed to the correct department, and the appropriate staff are notified. When an admin updates a concern's status, the change is recorded in the database along with who made the change and when. When users view concerns, the system retrieves only the data they're authorized to see. When files are attached to concerns, they're uploaded to secure storage and a link is saved with the concern. When concerns are submitted or updated, email notifications are automatically sent to relevant parties.
+
+---
+
+## Benefits of Using Supabase
+
+- Real-time Updates mean that when one user makes a change, all other connected users see that change immediately without needing to refresh their browser.
+- Security is enforced at the database level, ensuring that access control cannot be bypassed through the application.
+- Scalability allows the system to handle increasing numbers of students and concerns without performance degradation.
+- Reliability means the data is automatically backed up and protected.
+- Cost-Effectiveness makes it an ideal solution for educational institutions.
+- Easy Integration with the React application means development is straightforward.
+- Audit Trail capabilities ensure that all actions are tracked for accountability and compliance purposes.
+
+---
+
+## Future Enhancements
+
+- SMS notifications for status updates
+- Advanced analytics and reporting dashboards
+- Integration with institutional email systems
+- Mobile app version
+- Automated concern escalation based on response time
+- AI-powered concern categorization
+- Integration with other student systems
